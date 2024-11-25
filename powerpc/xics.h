@@ -11,7 +11,7 @@
 #ifndef XICS_H
 #define XICS_H
 
-#define XICS_IPI        0x2
+#define XICS_IPI 0x2
 
 int xics_alloc_irqnum(void);
 

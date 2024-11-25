@@ -5,8 +5,8 @@
 #include <stdbool.h>
 
 struct kvm_cpu_task {
-	void (*func)(struct kvm_cpu *vcpu, void *data);
-	void *data;
+  void (*func)(struct kvm_cpu *vcpu, void *data);
+  void *data;
 };
 
 int kvm_cpu__init(struct kvm *kvm);

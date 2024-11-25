@@ -28,7 +28,9 @@ ssize_t writev_in_full(int fd, const struct iovec *iov, int iovcnt);
 ssize_t xpreadv(int fd, const struct iovec *iov, int iovcnt, off_t offset);
 ssize_t xpwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset);
 
-ssize_t preadv_in_full(int fd, const struct iovec *iov, int iovcnt, off_t offset);
-ssize_t pwritev_in_full(int fd, const struct iovec *iov, int iovcnt, off_t offset);
+ssize_t preadv_in_full(int fd, const struct iovec *iov, int iovcnt,
+                       off_t offset);
+ssize_t pwritev_in_full(int fd, const struct iovec *iov, int iovcnt,
+                        off_t offset);
 
 #endif /* KVM_READ_WRITE_H */

@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "*.bin": "code-text-binary",
+        "devices.h": "c",
+        "kvm.h": "c",
+        "byteorder.h": "c",
+        "stdbool.h": "c",
+        "kernel.h": "c",
+        "fdt.h": "c"
+    },
+    "commentTranslate.source": "Copilot",
+    "C_Cpp.intelliSenseEngine": "disabled"
+}

@@ -14,8 +14,8 @@
  * 3. Neither the name of IBM nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED.  IN NO EVENT SHALL IBM OR CONTRIBUTORS BE LIABLE
  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
@@ -25,9 +25,9 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE. */
-#include <linux/virtio_types.h>
-#include <linux/virtio_ids.h>
 #include <linux/virtio_config.h>
+#include <linux/virtio_ids.h>
+#include <linux/virtio_types.h>
 
 /* The feature bitmap for virtio 9P */
 
@@ -35,10 +35,10 @@
 #define VIRTIO_9P_MOUNT_TAG 0
 
 struct virtio_9p_config {
-	/* length of the tag name */
-	__virtio16 tag_len;
-	/* non-NULL terminated tag name */
-	__u8 tag[];
+  /* length of the tag name */
+  __virtio16 tag_len;
+  /* non-NULL terminated tag name */
+  __u8 tag[];
 } __attribute__((packed));
 
 #endif /* _LINUX_VIRTIO_9P_H */

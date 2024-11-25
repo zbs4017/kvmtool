@@ -12,6 +12,4 @@
 
 #include <stdlib.h>
 
-void ioport__map_irq(u8 *irq)
-{
-}
+void ioport__map_irq(u8 *irq) {}

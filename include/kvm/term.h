@@ -3,14 +3,14 @@
 
 #include "kvm/kvm.h"
 
-#include <sys/uio.h>
 #include <stdbool.h>
+#include <sys/uio.h>
 
-#define CONSOLE_8250	1
-#define CONSOLE_VIRTIO	2
-#define CONSOLE_HV	3
+#define CONSOLE_8250 1
+#define CONSOLE_VIRTIO 2
+#define CONSOLE_HV 3
 
-#define TERM_MAX_DEVS	4
+#define TERM_MAX_DEVS 4
 
 int term_putc_iov(struct iovec *iov, int iovcnt, int term);
 int term_getc_iov(struct kvm *kvm, struct iovec *iov, int iovcnt, int term);

@@ -7,20 +7,20 @@
 
 #include "arm-common/gic.h"
 
-#define GICV2M_MSI_TYPER	0x008
-#define GICV2M_MSI_SETSPI	0x040
-#define GICV2M_MSI_IIDR		0xfcc
+#define GICV2M_MSI_TYPER 0x008
+#define GICV2M_MSI_SETSPI 0x040
+#define GICV2M_MSI_IIDR 0xfcc
 
-#define GICV2M_SPI_MASK		0x3ff
-#define GICV2M_MSI_TYPER_VAL(start, nr)	\
-	(((start) & GICV2M_SPI_MASK) << 16 | ((nr) & GICV2M_SPI_MASK))
+#define GICV2M_SPI_MASK 0x3ff
+#define GICV2M_MSI_TYPER_VAL(start, nr)                                        \
+  (((start) & GICV2M_SPI_MASK) << 16 | ((nr) & GICV2M_SPI_MASK))
 
 struct gicv2m_chip {
-	int	first_spi;
-	int	num_spis;
-	int	*spis;
-	u64	base;
-	u64	size;
+  int first_spi;
+  int num_spis;
+  int *spis;
+  u64 base;
+  u64 size;
 };
 
 static struct gicv2m_chip v2m;
@@ -38,118 +38,109 @@ static struct gicv2m_chip v2m;
  * allocated by kvmtool.
  */
 static int gicv2m_update_routing(struct kvm *kvm,
-				 struct kvm_irq_routing_entry *entry)
-{
-	int spi;
+                                 struct kvm_irq_routing_entry *entry) {
+  int spi;
 
-	if (entry->type != KVM_IRQ_ROUTING_MSI) {
-		errno = EINVAL;
-		return -errno;
-	}
+  if (entry->type != KVM_IRQ_ROUTING_MSI) {
+    errno = EINVAL;
+    return -errno;
+  }
 
-	if (!entry->u.msi.address_hi && !entry->u.msi.address_lo)
-		return 0;
+  if (!entry->u.msi.address_hi && !entry->u.msi.address_lo)
+    return 0;
 
-	spi = entry->u.msi.data & GICV2M_SPI_MASK;
-	if (spi < v2m.first_spi || spi >= v2m.first_spi + v2m.num_spis) {
-		errno = EINVAL;
-		return -errno;
-	}
+  spi = entry->u.msi.data & GICV2M_SPI_MASK;
+  if (spi < v2m.first_spi || spi >= v2m.first_spi + v2m.num_spis) {
+    errno = EINVAL;
+    return -errno;
+  }
 
-	v2m.spis[spi - v2m.first_spi] = entry->gsi;
+  v2m.spis[spi - v2m.first_spi] = entry->gsi;
 
-	return 0;
+  return 0;
 }
 
 /*
  * Find SPI bound to the given MSI and return the associated GSI.
  */
-static int gicv2m_translate_gsi(struct kvm *kvm, u32 gsi)
-{
-	int i;
+static int gicv2m_translate_gsi(struct kvm *kvm, u32 gsi) {
+  int i;
 
-	for (i = 0; i < v2m.num_spis; i++) {
-		if (v2m.spis[i] == (int)gsi)
-			return i + v2m.first_spi - KVM_IRQ_OFFSET;
-	}
+  for (i = 0; i < v2m.num_spis; i++) {
+    if (v2m.spis[i] == (int)gsi)
+      return i + v2m.first_spi - KVM_IRQ_OFFSET;
+  }
 
-	/* Not an MSI */
-	return gsi;
+  /* Not an MSI */
+  return gsi;
 }
 
-static bool gicv2m_can_signal_msi(struct kvm *kvm)
-{
-	return true;
-}
+static bool gicv2m_can_signal_msi(struct kvm *kvm) { return true; }
 
 /*
  * Instead of setting up MSI routes, virtual devices can also trigger them
  * manually (like a direct write to MSI_SETSPI). In this case, trigger the SPI
  * directly.
  */
-static int gicv2m_signal_msi(struct kvm *kvm, struct kvm_msi *msi)
-{
-	int spi = msi->data & GICV2M_SPI_MASK;
+static int gicv2m_signal_msi(struct kvm *kvm, struct kvm_msi *msi) {
+  int spi = msi->data & GICV2M_SPI_MASK;
 
-	if (spi < v2m.first_spi || spi >= v2m.first_spi + v2m.num_spis) {
-		pr_err("invalid SPI number %d", spi);
-		return -EINVAL;
-	}
+  if (spi < v2m.first_spi || spi >= v2m.first_spi + v2m.num_spis) {
+    pr_err("invalid SPI number %d", spi);
+    return -EINVAL;
+  }
 
-	kvm__irq_trigger(kvm, spi);
-	return 0;
+  kvm__irq_trigger(kvm, spi);
+  return 0;
 }
 
 static struct msi_routing_ops gicv2m_routing = {
-	.update_route	= gicv2m_update_routing,
-	.translate_gsi	= gicv2m_translate_gsi,
-	.can_signal_msi	= gicv2m_can_signal_msi,
-	.signal_msi	= gicv2m_signal_msi,
+    .update_route = gicv2m_update_routing,
+    .translate_gsi = gicv2m_translate_gsi,
+    .can_signal_msi = gicv2m_can_signal_msi,
+    .signal_msi = gicv2m_signal_msi,
 };
 
 static void gicv2m_mmio_callback(struct kvm_cpu *vcpu, u64 addr, u8 *data,
-				  u32 len, u8 is_write, void *ptr)
-{
-	if (is_write)
-		return;
+                                 u32 len, u8 is_write, void *ptr) {
+  if (is_write)
+    return;
 
-	addr -= v2m.base;
+  addr -= v2m.base;
 
-	switch (addr) {
-		case GICV2M_MSI_TYPER:
-			*(u32 *)data = GICV2M_MSI_TYPER_VAL(v2m.first_spi,
-							    v2m.num_spis);
-			break;
-		case GICV2M_MSI_IIDR:
-			*(u32 *)data = 0x0;
-			break;
-	}
+  switch (addr) {
+  case GICV2M_MSI_TYPER:
+    *(u32 *)data = GICV2M_MSI_TYPER_VAL(v2m.first_spi, v2m.num_spis);
+    break;
+  case GICV2M_MSI_IIDR:
+    *(u32 *)data = 0x0;
+    break;
+  }
 }
 
-int gic__create_gicv2m_frame(struct kvm *kvm, u64 base)
-{
-	int i;
-	int irq = irq__alloc_line();
+int gic__create_gicv2m_frame(struct kvm *kvm, u64 base) {
+  int i;
+  int irq = irq__alloc_line();
 
-	v2m = (struct gicv2m_chip) {
-		.first_spi	= irq,	/* Includes GIC_SPI_IRQ_BASE */
-		.num_spis	= 64,	/* arbitrary */
-		.base		= base,
-		.size		= KVM_VGIC_V2M_SIZE,
-	};
+  v2m = (struct gicv2m_chip){
+      .first_spi = irq, /* Includes GIC_SPI_IRQ_BASE */
+      .num_spis = 64,   /* arbitrary */
+      .base = base,
+      .size = KVM_VGIC_V2M_SIZE,
+  };
 
-	v2m.spis = calloc(v2m.num_spis, sizeof(int));
-	if (!v2m.spis)
-		return -ENOMEM;
+  v2m.spis = calloc(v2m.num_spis, sizeof(int));
+  if (!v2m.spis)
+    return -ENOMEM;
 
-	v2m.spis[0] = -1;
-	for (i = 1; i < v2m.num_spis; i++) {
-		irq__alloc_line();
-		v2m.spis[i] = -1;
-	}
+  v2m.spis[0] = -1;
+  for (i = 1; i < v2m.num_spis; i++) {
+    irq__alloc_line();
+    v2m.spis[i] = -1;
+  }
 
-	msi_routing_ops = &gicv2m_routing;
+  msi_routing_ops = &gicv2m_routing;
 
-	return kvm__register_mmio(kvm, base, KVM_VGIC_V2M_SIZE, false,
-				  gicv2m_mmio_callback, kvm);
+  return kvm__register_mmio(kvm, base, KVM_VGIC_V2M_SIZE, false,
+                            gicv2m_mmio_callback, kvm);
 }
