@@ -311,7 +311,7 @@ static void kvm_ipc__handle_event(struct kvm *kvm, struct epoll_event *ev) {
 
   if (fd == server_fd) {
     int client, r;
-
+    // 新连接来了，创建新的fd
     client = kvm_ipc__new_conn(fd);
     /*
      * Handle multiple IPC cmd at a time

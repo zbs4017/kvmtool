@@ -9,9 +9,9 @@
 #include "bios/bios-rom.h"
 
 struct irq_handler {
-  unsigned long address;//中断服务例程的物理地址
-  unsigned int irq;//中断号
-  void *handler;//中断服务例程的函数指针
+  unsigned long address; // 中断服务例程的物理地址
+  unsigned int irq;      // 中断号
+  void *handler;         // 中断服务例程的函数指针
   size_t size;
 };
 
@@ -29,13 +29,16 @@ static struct irq_handler bios_irq_handlers[] = {
     DEFINE_BIOS_IRQ_HANDLER(0x10, bios_int10),
     DEFINE_BIOS_IRQ_HANDLER(0x15, bios_int15),
 };
-//设置中断处理程序
+// 设置中断处理程序
 static void setup_irq_handler(struct kvm *kvm, struct irq_handler *handler) {
   struct real_intr_desc intr_desc;
   void *p;
-  //复制bios中断服务例程到guest的物理内存
-  p = guest_flat_to_host(kvm, handler->address);//根据这个中断服务例程的物理地址推算出host的虚拟地址
-  memcpy(p, handler->handler, handler->size);//将中断服务例程复制到guest的物理内存
+  // 复制bios中断服务例程到guest的物理内存
+  p = guest_flat_to_host(
+      kvm,
+      handler->address); // 根据这个中断服务例程的物理地址推算出host的虚拟地址
+  memcpy(p, handler->handler,
+         handler->size); // 将中断服务例程复制到guest的物理内存
 
   intr_desc = (struct real_intr_desc){
       .segment = REAL_SEGMENT(MB_BIOS_BEGIN),
@@ -157,12 +160,14 @@ void setup_bios(struct kvm *kvm) {
       .segment = REAL_SEGMENT(MB_BIOS_BEGIN),
       .offset = address - MB_BIOS_BEGIN,
   };
+  // 用这个默认处理程序初始化整个中断向量表
   interrupt_table__setup(&kvm->arch.interrupt_table, &intr_desc);
-
+  // 将我们实现的两个放进去，分别是10 和15
   for (i = 0; i < ARRAY_SIZE(bios_irq_handlers); i++)
     setup_irq_handler(kvm, &bios_irq_handlers[i]);
 
   /* we almost done */
   p = guest_flat_to_host(kvm, 0);
+  // 将中断向量表复制到guest的物理内存
   interrupt_table__copy(&kvm->arch.interrupt_table, p, REAL_INTR_SIZE);
 }

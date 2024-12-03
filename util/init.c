@@ -26,7 +26,7 @@ int exit_list_add(struct init_item *t, int (*init)(struct kvm *), int priority,
 
   return 0;
 }
-
+// 核心函数，在这里启动全部的东西
 int init_list__init(struct kvm *kvm) {
   unsigned int i;
   int r = 0;

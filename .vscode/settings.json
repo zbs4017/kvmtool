@@ -8,6 +8,6 @@
         "kernel.h": "c",
         "fdt.h": "c"
     },
-    "commentTranslate.source": "Copilot",
+    "commentTranslate.source": "intellsmi.comment-translate-ali.cloud",
     "C_Cpp.intelliSenseEngine": "disabled"
 }

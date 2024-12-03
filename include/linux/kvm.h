@@ -467,8 +467,8 @@ struct kvm_coalesced_mmio_zone {
 };
 
 struct kvm_coalesced_mmio {
-  __u64 phys_addr;
-  __u32 len;
+  __u64 phys_addr; // guest 物理地址
+  __u32 len;       // 长度
   union {
     __u32 pad;
     __u32 pio;
@@ -959,7 +959,7 @@ struct kvm_irq_routing_xen_evtchn {
 #define KVM_IRQ_ROUTING_XEN_EVTCHN 5
 
 struct kvm_irq_routing_entry {
-  __u32 gsi;
+  __u32 gsi; // 全局系统中断号
   __u32 type;
   __u32 flags;
   __u32 pad;

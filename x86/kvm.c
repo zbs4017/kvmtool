@@ -88,7 +88,7 @@ bool kvm__arch_cpu_supports_vm(void) {
 void kvm__init_ram(struct kvm *kvm) {
   u64 phys_start, phys_size;
   void *host_mem;
-  //分为两种情况，分别是小于4g和大于4g
+  // 分为两种情况，分别是小于4g和大于4g
   if (kvm->ram_size < KVM_32BIT_GAP_START) {
     /* Use a single block of RAM for 32bit RAM */
 
@@ -244,29 +244,33 @@ static bool load_bzimage(struct kvm *kvm, int fd_kernel, int fd_initrd,
 
   if (read_in_full(fd_kernel, &boot, sizeof(boot)) != sizeof(boot))
     return false;
-
+  // 必须验证魔数("HdrS")
   if (memcmp(&boot.hdr.header, BZIMAGE_MAGIC, strlen(BZIMAGE_MAGIC)))
     return false;
-
+  // 必须检查协议版本
   if (boot.hdr.version < BOOT_PROTOCOL_REQUIRED)
     die("Too old kernel");
 
   if (lseek(fd_kernel, 0, SEEK_SET) < 0)
     die_perror("lseek");
-
+  /*
+   * setup_sects如果为0，默认值是4
+   * 大小计算方式是(setup_sects + 1) * 512字节
+   * 这部分代码必须加载到实模式可访问的内存
+   */
   if (!boot.hdr.setup_sects)
     boot.hdr.setup_sects = BZ_DEFAULT_SETUP_SECTS;
   file_size = (boot.hdr.setup_sects + 1) << 9;
   p = guest_real_to_host(kvm, BOOT_LOADER_SELECTOR, BOOT_LOADER_IP);
   if (read_in_full(fd_kernel, p, file_size) != file_size)
     die_perror("kernel setup read");
-
+  // 加载实际内核
   /* read actual kernel image (vmlinux.bin) to BZ_KERNEL_START */
   p = guest_flat_to_host(kvm, BZ_KERNEL_START);
   file_size = read_file(fd_kernel, p, kvm->cfg.ram_size - BZ_KERNEL_START);
   if (file_size < 0)
     die_perror("kernel read");
-
+  // 加载内核命令行
   p = guest_flat_to_host(kvm, BOOT_CMDLINE_OFFSET);
   if (kernel_cmdline) {
     cmdline_size = strlen(kernel_cmdline) + 1;

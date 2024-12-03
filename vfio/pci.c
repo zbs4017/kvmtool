@@ -243,7 +243,7 @@ static int vfio_pci_update_msi_entry(struct kvm *kvm, struct vfio_device *vdev,
    *
    * So entry->host_state is masked when there is no active irqfd route.
    */
-  
+
   if (msi_is_masked(entry->guest_state) == msi_is_masked(entry->host_state))
     return 0;
 

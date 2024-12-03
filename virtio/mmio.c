@@ -32,7 +32,7 @@ int virtio_mmio_init_ioeventfd(struct kvm *kvm, struct virtio_device *vdev,
   int err;
 
   vmmio->ioeventfds[vq] = (struct virtio_mmio_ioevent_param){
-      .vdev = vdev,
+      .vdev = vdev, 
       .vq = vq,
   };
 
